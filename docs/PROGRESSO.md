@@ -18,3 +18,18 @@ Agente independente escreveu testes: 46 passaram. Cobertura de concorrência,
 reprocessamento, saldo e filtros. Falha encontrada pelo agente: strip removia
 controles nas extremidades da descrição antes da validação. Corrigido e testado.
 Pesquisa de referências e restrições registrada em REFERENCIAS.md.
+
+## Etapa 2: fluxo completo local
+
+Bot com comandos estruturados e autorização centralizada em todas as mensagens e
+callbacks. Registro confirma somente após commit SQLite. Exclusão tem nonce,
+vínculo usuário/chat/ID, validade de 5 minutos, cancelamento e proteção contra
+botões antigos. Long polling explícito via Bot da biblioteca mantida, offset
+persistido após processamento e espera progressiva. Lock de processo evita dois
+bots no mesmo banco. Dashboard independente com consultas a cada segundo,
+indicadores distintos, filtros e seleção/scroll preservados. CLI com demo
+isolada, init e backup.
+
+Validação de agente identificou colisão `_ready` com método interno do Textual:
+renomeado para `_dashboard_ready`. Fluxo testado com Telegram simulado e TUI
+headless. Dependências transitivas congeladas em requirements.lock.

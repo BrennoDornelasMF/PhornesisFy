@@ -161,6 +161,11 @@ class Repository:
         with self.connection() as db:
             db.execute("DELETE FROM pending_deletions WHERE user_id=? AND chat_id=?", (user_id, chat_id))
 
+    def cancel_matching_pending(self, user_id: int, chat_id: int, transaction_id: int, nonce: str) -> bool:
+        with self.connection() as db:
+            return db.execute("DELETE FROM pending_deletions WHERE user_id=? AND chat_id=? AND transaction_id=? AND nonce=?",
+                              (user_id, chat_id, transaction_id, nonce)).rowcount > 0
+
     def confirm_delete(self, user_id: int, chat_id: int, transaction_id: int, nonce: str, now: int) -> bool:
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
