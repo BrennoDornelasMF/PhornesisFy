@@ -5,11 +5,21 @@ from zoneinfo import ZoneInfo
 
 from rich.text import Text
 from textual.app import App, ComposeResult
-from textual.containers import Grid, Horizontal, Vertical
+from textual.containers import Grid, Horizontal, Vertical, VerticalScroll
 from textual.widgets import DataTable, Footer, Header, Input, Select, Static
 
 from .domain import CATEGORIES, LABELS, ValidationError, format_brl, validate_month
 from .repository import Repository
+
+
+class CategoryPanel(VerticalScroll):
+    """Barras roláveis também pelo teclado em terminais compactos."""
+
+    def compose(self) -> ComposeResult:
+        yield Static(id='categories-content')
+
+    def update(self, content):
+        self.query_one('#categories-content', Static).update(content)
 
 
 class FinanceApp(App):
@@ -28,6 +38,7 @@ class FinanceApp(App):
     .card { border: round #3c91b6; padding: 0 1; background: #111e31; }
     #balance { border: round #65c7a0; }
     #categories { border: round #a794ce; height: 8; padding: 0 1; overflow-y: auto; }
+    #categories-content { height: auto; }
     #history { border: round #3c91b6; height: 1fr; min-height: 5; }
     #status { height: 2; color: #a8b8cf; }
     #small { display: none; padding: 1; border: round #e0b76c; }
@@ -45,6 +56,8 @@ class FinanceApp(App):
         self.repository = repository
         self.timezone = timezone
         self.demo = demo
+        if demo:
+            self.sub_title = 'DEMONSTRAÇÃO · dados fictícios em banco separado'
         self.month = datetime.now(ZoneInfo(timezone)).strftime('%Y-%m')
         self._snapshot = None
         self._dashboard_ready = False
@@ -64,7 +77,7 @@ class FinanceApp(App):
                 yield Static(id='income', classes='card')
                 yield Static(id='expense', classes='card')
                 yield Static(id='result', classes='card')
-            yield Static(id='categories')
+            yield CategoryPanel(id='categories')
             yield DataTable(id='history', cursor_type='row', zebra_stripes=True)
             yield Static(id='status')
         yield Footer()
@@ -74,7 +87,7 @@ class FinanceApp(App):
         table = self.query_one('#history', DataTable)
         table.add_columns('ID', 'Data', 'Tipo', 'Categoria', 'Descrição', 'Valor (BRL)')
         table.border_title = 'Histórico · setas / PgUp / PgDn · Tab alterna foco'
-        self.query_one('#categories', Static).border_title = 'Despesas por categoria · mês selecionado'
+        self.query_one('#categories', CategoryPanel).border_title = 'Despesas por categoria · mês selecionado'
         self._dashboard_ready = True
         self._resize_layout(self.size.width, self.size.height)
         self.refresh_dashboard()
@@ -138,7 +151,7 @@ class FinanceApp(App):
             chart.append(f' {format_brl(amount)}\n')
         if not categories:
             chart.append('Nenhuma despesa neste mês. Registre pelo Telegram: /saida 35,90 alimentacao | Almoço')
-        self.query_one('#categories', Static).update(chart)
+        self.query_one('#categories', CategoryPanel).update(chart)
         table = self.query_one('#history', DataTable)
         selected = None
         old_row = table.cursor_row

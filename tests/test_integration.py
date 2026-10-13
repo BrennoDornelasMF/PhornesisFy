@@ -97,11 +97,12 @@ def test_bot_full_flow_validation_deduplication_and_confirmation(repository):
         assert repository.get(tx.id)
         keyboard = request.message.reply_text.call_args.kwargs["reply_markup"]
         callback = keyboard.inline_keyboard[0][0].callback_data
-        unauthorized = fake_update(callback=callback, user=99)
-        await controller.handle(unauthorized)
-        unauthorized.callback_query.answer.assert_awaited_once()
-        unauthorized.callback_query.edit_message_text.assert_not_awaited()
-        assert repository.get(tx.id)
+        for identity in [{"user": 99}, {"chat_type": "group"}]:
+            unauthorized = fake_update(callback=callback, **identity)
+            await controller.handle(unauthorized)
+            unauthorized.callback_query.answer.assert_awaited_once()
+            unauthorized.callback_query.edit_message_text.assert_not_awaited()
+            assert repository.get(tx.id)
         confirmation = fake_update(callback=callback)
         await controller.handle(confirmation)
         assert repository.get(tx.id) is None
@@ -251,3 +252,31 @@ def test_long_polling_reconnects_with_backoff_and_persists_offset(repository):
     assert repository.get_offset() == 42
     assert repository.balance() == 11000
     assert bot.get_updates.await_args_list[-1].kwargs["offset"] == 42
+
+
+def test_real_telegram_update_and_bot_after_dashboard_closes(repository):
+    """Objetos oficiais e hooks reply_text reais; somente transporte é simulado."""
+    from telegram import Bot, Update
+    from phronesisfy.bot import TelegramController
+    from phronesisfy.tui import FinanceApp
+
+    bot = Bot("123456:fake-token")
+    controller = TelegramController(repository, Settings(repository.path, telegram_user_id=10))
+    payload = {"update_id": 501, "message": {
+        "message_id": 1, "date": 1791849600,
+        "from": {"id": 10, "is_bot": False, "first_name": "Teste"},
+        "chat": {"id": 10, "type": "private", "first_name": "Teste"},
+        "text": "/entrada 10 outros @2026-10-13 | Transporte simulado",
+    }}
+    update = Update.de_json(payload, bot)
+
+    async def scenario():
+        async with FinanceApp(repository).run_test(size=(100, 30)):
+            pass
+        with patch("telegram.Bot.send_message", new_callable=AsyncMock) as send:
+            await controller.handle(update)
+            assert "Registrado no computador" in send.call_args.kwargs["text"]
+            assert send.call_args.kwargs["chat_id"] == 10
+        assert repository.balance() == 11000
+
+    asyncio.run(scenario())

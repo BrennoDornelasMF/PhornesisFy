@@ -33,3 +33,21 @@ isolada, init e backup.
 Validação de agente identificou colisão `_ready` com método interno do Textual:
 renomeado para `_dashboard_ready`. Fluxo testado com Telegram simulado e TUI
 headless. Dependências transitivas congeladas em requirements.lock.
+
+## Etapa 3: resiliência e validação ampliada
+
+Testes independentes cobrem bootstrap/polling com falhas de rede, espera
+progressiva até 60s, RetryAfter em inteiro/timedelta, retomada de offset e falha
+na resposta após commit sem duplicar lançamento. Conflict e InvalidToken são
+fatais (Conflict não herda NetworkError na versão usada). Lock liberado ao
+encerrar, demo isolada/reabertura e backup dos marcadores validados.
+
+Teste usa objetos reais telegram.Update/Message com somente transporte mockado;
+confirmado registro após encerrar a TUI. Layout mínimo 80x24 e tamanhos maiores
+validados, fluxo comando → SQLite → TUI visível em 1,2s, filtros/foco/ID/scroll
+preservados. Painel de categorias ganhou rolagem por teclado após validação em
+layout compacto. Demonstração tem identificação permanente no cabeçalho.
+
+Execução real da CLI no PTY: demo abriu e saiu com q, sem token. init/backup
+executados com banco de teste em /tmp; bot sem credenciais falha claramente
+antes de iniciar. Não foram usados banco pessoal ou conta Telegram reais.
