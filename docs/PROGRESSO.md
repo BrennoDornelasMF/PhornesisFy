@@ -51,3 +51,37 @@ layout compacto. Demonstração tem identificação permanente no cabeçalho.
 Execução real da CLI no PTY: demo abriu e saiu com q, sem token. init/backup
 executados com banco de teste em /tmp; bot sem credenciais falha claramente
 antes de iniciar. Não foram usados banco pessoal ou conta Telegram reais.
+
+## Etapa 4: documentação e resultado final
+
+README em português e guia INSTALACAO-E-USO entregues: instalação no Ubuntu com
+venv, BotFather e ID autorizado, configuração por ambiente, inicialização,
+comandos/data/categorias, distinção saldo/resultado mensal, demo, backup seguro,
+restauração, limitações e troubleshooting. Serviço systemd de usuário descrito
+como opção manual; nenhum serviço, configuração global ou credencial alterados.
+
+Resultado final: `PTB_TIMEDELTA=true .venv/bin/python -m pytest -q` — **97 passed**;
+`pip check` sem conflitos; compileall e git diff --check aprovados. PTB_TIMEDELTA
+ativa antecipadamente o tipo timedelta recomendado pela biblioteca e evita
+avisos de depreciação; também foram testados ambos os tipos (inteiro/timedelta).
+Sem essa variável, a suíte passa, mas PTB pode emitir avisos de retry_after.
+
+### Critérios de aceite e evidência
+
+| Critério | Verificação |
+| --- | --- |
+| Dashboard inicia no Ubuntu | CLI demo em PTY; TUI headless 80x24,100x30,120x40 |
+| Receita/despesa via comandos | Controller com updates simulados e objetos reais PTB, transporte mockado |
+| Registro aparece automaticamente | Controller → banco → TUI em 1,2s nos testes |
+| Saldo/resumo/exclusão consistentes | Testes de valores inteiros, mês e saldo inicial |
+| Dados persistem | Reabertura de repository e backup/restauração testados |
+| Inválidos/terceiros rejeitados | Testes mensagens, tipos, grupos e callbacks |
+| Update não duplica | Reprocessamento, concorrência e replay após exclusão |
+| Exclusão exige confirmação | ID/usuário/chat/nonce/prazo e botões antigos testados |
+| Bot independe da TUI | Controller salva após encerrar o app headless |
+| Demo sem token e isolada | CLI e testes de reabertura/caminho reservado |
+| Rede falha sem loop intenso | Transporte mockado; backoff, bootstrap e RetryAfter |
+
+Pendente: comunicação com Telegram real, token/ID do usuário e observação da
+interface no terminal pessoal. Nenhuma mensagem enviada a terceiros; nenhum
+push ao remoto. A validação local não foi apresentada como teste de bot real.
