@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phronesisfy"
+version = "0.1.0"
+description = "Finanças pessoais locais: dashboard terminal e Telegram"
+requires-python = ">=3.12"
+dependencies = ["textual==8.2.8", "python-telegram-bot==22.8"]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1"]
+
+[project.scripts]
+phronesisfy = "phronesisfy.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
