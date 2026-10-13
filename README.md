@@ -1,3 +1,0 @@
-# PhornesisFy
-Phronesisfy nasceu de um projeto de férias com um objetivo simples:me ajudar a desenvolver uma relação mais consciente com o próprio dinheiro. O nome vem de phronesis, o conceito da filosofia grega (Aristóteles) para "sabedoria prática" — a capacidade de tomar boas decisões cotidianas, não apenas acumular conhecimento teórico. É exatamente isso que o app se propõe a fazer: transformar dados financeiros brutos em decisões melhores, no dia a dia, sem exigir que o usuário vire um especialista em finanças.
-Construído para funcionar tanto como aplicativo mobile quanto como aplicação desktop, compartilhando a mesma lógica de dados — permitindo registrar transações, organizar categorias, definir orçamentos e acompanhar metas financeiras de qualquer dispositivo.
